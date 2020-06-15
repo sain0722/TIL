@@ -4,15 +4,14 @@ const   ejs = require('ejs');
 const   mysql = require('mysql');
 const   bodyParser = require('body-parser');
 const   session = require('express-session');
-const   router = express.Router();
 
 router.use(bodyParser.urlencoded({ extended: false }));
 
 const   db = mysql.createConnection({
     host: 'localhost',        // DB서버 IP주소
     port: 3306,               // DB서버 Port주소
-    user: 'gbdbuser',            // DB접속 아이디
-    password: 'jobbr1dge',  // DB암호
+    user: 'bmlee',            // DB접속 아이디
+    password: 'bmlee654321',  // DB암호
     database: 'bridge'         //사용할 DB명
 });
 
