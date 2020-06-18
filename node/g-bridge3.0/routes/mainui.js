@@ -1,14 +1,14 @@
 // 메인화면 출력파일
 const  express = require('express');
 const  ejs = require('ejs');
-const   fs = require('fs');
+const  fs = require('fs');
 const  router = express.Router();
 var    loglevel = 1;
 
 const  GetMainUI = (req, res) => {   // 메인화면을 출력합니다
 let    htmlstream = '';
 
-     logging(loglevel, 'router.get() invoked!');
+     logging(loglevel, '  GetMainUI() 호출 !!! ');
 
      htmlstream = fs.readFileSync(__dirname + '/../views/header.ejs','utf8');    // 헤더부분
      if (req.session.auth && req.session.admin) {  // 만약, 관리자가 로그인했다면
@@ -33,7 +33,7 @@ let    htmlstream = '';
                                         'logurl': '/users/auth',
                                         'loglabel': '로그인',
                                         'regurl': '/users/reg',
-                                        'reglabel':'회원가입' }));
+                                        'reglabel':'가입' }));
      }
 
 };

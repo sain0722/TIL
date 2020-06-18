@@ -4,6 +4,8 @@ const   ejs = require('ejs');
 const   mysql = require('mysql');
 const   bodyParser = require('body-parser');
 const   session = require('express-session');
+const   router = express.Router();
+const crypto = require('crypto');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 
@@ -38,7 +40,7 @@ const PrintRegistrationForm = (req, res) => {
                                           'logurl': '/users/auth',
                                           'loglabel': '로그인',
                                           'regurl': '/users/reg',
-                                          'reglabel':'회원가입' }));
+                                          'reglabel':'가입' }));
        }
 
 };
@@ -47,23 +49,24 @@ const PrintRegistrationForm = (req, res) => {
 const HandleRegistration = (req, res) => {  // 회원가입
 let body = req.body;
 let htmlstream='';
+const algorithm = 'des-ecb';
+console.log(body)
+    // 임시로 확인하기 위해 콘솔에 출력해봅니다.
+    console.log('회원가입 입력정보 :%s, %s, %s',body.uid, body.pw1, body.uname);
 
-    console.log(body.uid);     // 임시로 확인하기 위해 콘솔에 출력해봅니다.
-    console.log(body.pw1);
-    console.log(body.uname);
-    console.log(body.phone);
-    console.log(body.birth);
-
+    const key = Buffer.from("d0e276d0144890d3", "hex");
+    var cipher = crypto.createCipheriv(algorithm, key, null);
+    let encrypted_pw = cipher.update(body.pw1, 'utf8', 'hex')
+    encrypted_pw += cipher.final('hex')
 
     if (body.uid == '' || body.pw1 == '') {
          console.log("데이터입력이 되지 않아 DB에 저장할 수 없습니다.");
          res.status(561).end('<meta charset="utf-8">데이터가 입력되지 않아 가입을 할 수 없습니다');
     }
     else {
-       db.query('INSERT INTO u20_users (userid, pwd, username, address, phone, birth, usertype) VALUES (?, ?, ?, ?, ?, ?, ?)', [body.uid, body.pw1, body.uname, body.address, body.phone, body.birth, body.usertype], (error, results, fields) => {
+
+       db.query('INSERT INTO u20_users (uid, pass, name, point, mobile) VALUES (?, ?, ?, ?, ?)', [body.uid, encrypted_pw, body.uname, body.point, body.mobile], (error, results, fields) => {
           if (error) {
-            // console.log(error);
-            console.log(req.session.address);
             htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
             res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
                                'warn_title':'회원가입 오류',
@@ -94,7 +97,6 @@ const PrintLoginForm = (req, res) => {
        htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/login_form.ejs','utf8');
        htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/footer.ejs','utf8');
        res.writeHead(200, {'Content-Type':'text/html; charset=utf8'});
-       console.log(req.session.address);
 
        if (req.session.auth) {  // true :로그인된 상태,  false : 로그인안된 상태
            res.end(ejs.render(htmlstream,  { 'title' : '쇼핑몰site',
@@ -108,7 +110,7 @@ const PrintLoginForm = (req, res) => {
                                           'logurl': '/users/auth',
                                           'loglabel': '로그인',
                                           'regurl': '/users/reg',
-                                          'reglabel':'회원가입' }));
+                                          'reglabel':'가입' }));
        }
 
 };
@@ -117,24 +119,30 @@ const PrintLoginForm = (req, res) => {
 const HandleLogin = (req, res) => {
   let body = req.body;
   let userid, userpass, username;
-  let useraddress, userphone, usertype;
-  let userbirth;
-  let userpoint;
   let sql_str;
   let htmlstream = '';
+  const algorithm = 'des-ecb';
 
-      console.log(body.uid);
-      console.log(body.pass);
+  console.log('로그인 입력정보: %s, %s', body.uid, body.pass);
+
+    const key = Buffer.from("d0e276d0144890d3", "hex");
+    var cipher = crypto.createCipheriv(algorithm, key, null);
+    let encrypted_pw = cipher.update(body.pass, 'utf8', 'hex');
+    encrypted_pw += cipher.final('hex');
+
       if (body.uid == '' || body.pass == '') {
          console.log("아이디나 암호가 입력되지 않아서 로그인할 수 없습니다.");
          res.status(562).end('<meta charset="utf-8">아이디나 암호가 입력되지 않아서 로그인할 수 없습니다.');
       }
       else {
-       sql_str = "SELECT * from u20_users where userid ='"+ body.uid +"' and pwd='" + body.pass + "';";
+       sql_str = "SELECT uid, pass, name, mobile, point from u20_users where uid ='"+ body.uid +"' and pass='" + encrypted_pw + "';";
        console.log("SQL: " + sql_str);
        db.query(sql_str, (error, results, fields) => {
-         if (error) { res.status(562).end("Login Fail as No id in DB!"); }
-         else {
+
+
+           if (error) { res.status(562).end("Login Fail as No id in DB!"); }
+
+           else {
             if (results.length <= 0) {  // select 조회결과가 없는 경우 (즉, 등록계정이 없는 경우)
                   htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
                   res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
@@ -143,22 +151,22 @@ const HandleLogin = (req, res) => {
                                      'return_url':'/' }));
              } else {  // select 조회결과가 있는 경우 (즉, 등록사용자인 경우)
                results.forEach((item, index) => {
-                  userid = item.userid;  userpass = item.pwd; username = item.username;
-                  useraddress = item.address; userphone = item.phone; usertype = item.usertype;
-                  userbirth = item.birth; userpoint = item.point;
-
+                  userid = item.uid;  userpass = item.pass; username = item.name;
+                  usermobile = item.mobile; userpoint = item.point;
                   console.log("DB에서 로그인성공한 ID/암호:%s/%s", userid, userpass);
-                  if (body.uid == userid && body.pass == userpass) {
-                     req.session.auth = 99;      // 임의로 수(99)로 로그인성공했다는 것을 설정함
-                     req.session.who = username;
-                     req.session.uid = userid;
-                     req.session.address = useraddress;
-                     req.session.phone = userphone;
-                     req.session.usertype = usertype;
-                     req.session.birth = userbirth;
-                     req.session.point = userpoint;
-                       // 인증된 사용자명 확보 (로그인후 이름출력용)
-                     if (body.uid == 'admin')    // 만약, 인증된 사용자가 관리자(admin)라면 이를 표시
+
+                  if (body.uid == userid && encrypted_pw == userpass) {
+
+                      req.session.auth = 99;      // 임의로 수(99)로 로그인성공했다는 것을 설정함
+                      req.session.who = username; // 인증된 사용자명 확보 (로그인후 이름출력용)
+                      req.session.uid = userid;
+                      req.session.pass = userpass;
+                      req.session.mobile = usermobile;
+                      req.session.point = userpoint;
+
+
+
+                      if (body.uid == 'admin')    // 만약, 인증된 사용자가 관리자(admin)라면 이를 표시
                           req.session.admin = true;
                      res.redirect('/');
                   }
@@ -186,126 +194,67 @@ const HandleLogout = (req, res) => {
 router.get('/logout', HandleLogout);       // 로그아웃 기능
 
 
-// --------------- 정보변경 기능을 개발합니다 --------------------
+// ------------------------------  정보 변경 화면 출력 ----------------------------------
 const PrintProfile = (req, res) => {
-  let    htmlstream = '';
-  let body = req.body;
-  let session = req.session;
-  console.log(session.uid);     // 임시로 확인하기 위해 콘솔에 출력해봅니다.
-  // console.log(session.pw1);
-  // console.log(session.uname);
-  // console.log(session.phone);
-  // console.log(session.birth);
-
-  // let uid = req.session.uid;
-       htmlstream = fs.readFileSync(__dirname + '/../views/header.ejs','utf8');
-       htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/navbar.ejs','utf8');
-       htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/profile.ejs','utf8');
-       htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/footer.ejs','utf8');
-       res.writeHead(200, {'Content-Type':'text/html; charset=utf8'});
+    let    htmlstream = '';
+    let session = req.session;
+    console.log("session의 UID", session.uid);     // 임시로 확인하기 위해 콘솔에 출력해봅니다.
 
 
-       if (req.session.auth) {  // true :로그인된 상태,  false : 로그인안된 상태
-           res.end(ejs.render(htmlstream,  { 'title' : '쇼핑몰site',
-                                             'logurl': '/users/logout',
-                                             'loglabel': '로그아웃',
-                                             'regurl': '/users/profile',
-                                             'reglabel': req.session.who,
-                                             'id':req.session.uid,
-                                             'address' : req.session.address,
-                                             'phone' : req.session.phone,
-                                             'usertype' : req.session.usertype,
-                                             'birth' : req.session.birth,
-                                             'point' : req.session.point}));
+    htmlstream = fs.readFileSync(__dirname + '/../views/header.ejs','utf8');    // 헤더부분
+    // admin 일 경우, 관리자 메뉴를 띄운다.
+    if (session.uid == "admin") {
+        htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/adminbar.ejs','utf8');  // 관리자 메뉴
+    }
+    else {
+        htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/navbar.ejs','utf8');  // 일반사용자 메뉴
+    }
+    htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/profile.ejs','utf8'); // profile 수정 메뉴
+    htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/footer.ejs','utf8');  // Footer
+    res.writeHead(200, {'Content-Type':'text/html; charset=utf8'});
 
-       }
-       else {
-          res.end(ejs.render(htmlstream, { 'title' : '쇼핑몰site',
-                                          'logurl': '/users/auth',
-                                          'loglabel': '로그인',
-                                          'regurl': '/users/reg',
-                                          'reglabel':'회원가입' }));
-       }
+    res.end(ejs.render(htmlstream,  { 'title' : '쇼핑몰site',
+                                'logurl': '/users/logout',
+                                'loglabel': '로그아웃',
+                                'regurl': '/users/profile',
+                                'reglabel': session.who,
+                                'id':session.uid,
+                                'mobile' : session.mobile,
+                                'point' : session.point}));
+
+}
+
+// --------------- 변경된 정보를 DB에 저장합니다. --------------------
+const HandleProfile = (req, res) => {
+    let    htmlstream = '';
+    let body = req.body;
+    const algorithm = 'des-ecb';
+    const key = Buffer.from("d0e276d0144890d3", "hex");
+    var cipher = crypto.createCipheriv(algorithm, key, null);
+    let encrypted_pw = cipher.update(body.pw1, 'utf8', 'hex');
+    encrypted_pw += cipher.final('hex');
+
+    let sql_str = "UPDATE u20_users SET pass = '"+ encrypted_pw +"', mobile = "+ body.mobile + " where uid = '"+ body.uid + "';";
+    console.log("SQL: " + sql_str);
+
+    if (body.pw1 == '' || body.pw2 == '') {
+        console.log("비밀번호 혹은 전화번호를 입력하지 않았습니다.");
+        res.status(562).end("Fail to change profile!!");
+    }
+    else {
+        db.query(sql_str, (error, results, fields) => {
+            if (error) {
+                res.status(562).end("Fail to change profile!!");
+            } else {
+                console.log("변경 성공!!");
+                res.redirect('/');
+            }
+        });
+    }
 
 }
 
 router.get('/profile', PrintProfile);     // 정보변경화면을 출력
-
-const HandleProfile = (req,res) =>{
-  let body = req.body;
-  let session = req.session;
-  let userid, userpass, username;
-  let useraddress, userphone, usertype;
-  let userbirth;
-  let userpoint;
-  db.query('UPDATE u20_users SET pwd=?, address=?, phone=?, birth=?, usertype=?, point=? WHERE userid=?',
-          [body.pw1, body.address, body.phone, body.birth, body.usertype, body.point, session.uid], (err,results,fields) =>{
-          if(err){
-                    htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
-                     res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
-                                                            'warn_title':'개인정보 수정 오류',
-                                                            'warn_message':'비밀번호가 틀렸습니다. 다시 확인하시기 바랍니다.',
-                                                            'return_url':'/' }));
-                                       }
-          else{
-            session.address = body.address;
-            session.phone = body.phone;
-            session.birth = body.birth;
-            session.usertype = body.usertype;
-            session.point = body.point;
-            res.redirect('/');
-          }
-
-            });
-};
-router.post('/profile',HandleProfile);  // 정보변경내용을 DB에 저장
-
-const Handlesearch = (req,res) =>{
-  let    htmlstream = '';
-  let htmlstream2 = '';
-  let body = req.body;
-  let session = req.session;
-  let itemid, category, maker, pname, modelnum;
-  let rdate, price, dcrate, amount, pic;
-  htmlstream = fs.readFileSync(__dirname + '/../views/header.ejs','utf8');
-  htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/navbar.ejs','utf8');
-  htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/search.ejs','utf8');
-  htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/footer.ejs','utf8');
-
-  if (req.session.auth) {  // true :로그인된 상태,  false : 로그인안된 상태
-    sql_str = "SELECT * from u20_products where pname = '"+body.pname+"';"; // 상품조회SQL
-    res.writeHead(200, {'Content-Type':'text/html; charset=utf8'});
-
-    db.query(sql_str, (error, results, fields) => {  // 상품조회 SQL실행
-        if (error) { res.status(562).end("AdminPrintProd: DB query is failed"); }
-        else if (results.length <= 0) {  // 조회된 상품이 없다면, 오류메시지 출력
-            htmlstream2 = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
-            res.status(562).end(ejs.render(htmlstream2, { 'title': '알리미',
-                               'warn_title':'상품조회 오류',
-                               'warn_message':'조회된 상품이 없습니다.',
-                               'return_url':'/' }));
-            }
-       else {  // 조회된 상품이 있다면, 상품리스트를 출력
-         console.log(results);
-         results.forEach((item, index) => {
-            itemid = item.itemid;  category = item.category; maker = item.maker;
-            pname = item.pname; modelnum = item.modelnum; rdate = item.rdate;
-            price = item.price; dcrate = item.dcreate; amount = item.amount;
-          });
-              res.end(ejs.render(htmlstream,  { 'title' : '쇼핑몰site',
-                                                'logurl': '/users/logout',
-                                                'loglabel': '로그아웃',
-                                                'regurl': '/users/profile',
-                                                'reglabel': req.session.who,
-                                                 prodata : results,
-                                                 'pname':pname }));  // 조회된 상품정보
-
-          } // else
-    }); // db.query()
-}
-};
-
-
-router.post('/search',Handlesearch);
+router.post('/profile', HandleProfile);   // 변경된 정보를 DB에 저장
 
 module.exports = router;
