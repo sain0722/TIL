@@ -1,54 +1,58 @@
 <!DOCTYPE html>
- <!--  Content (배너이미지) 부분 -->
-  <div> <img src="/images/banner1.png" class="img-fluid" alt="배너이미지" width="100%"> </div>
 
-  <!-- 컨텐츠(예, 쇼핑몰일경우 판매제품리스트)헤더부분 -->
-   <div class="container-fluid" style="border: solid 20px white; border-radius: 1px">
-     <div class="panel panel-default">
-   	  <div class="panel-heading">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item">쇼핑몰</a></li>
-            <li class="breadcrumb-item"><%= category %> </a></li>
-          </ol>
-        </nav>
-   	  </div>
+    <script language="javascript">
+      function validate() {
+        let pw1 = document.getElementById("pw1").value;
+        let pw2 = document.getElementById("pw2").value;
+        if (pw1 != pw2) {
+          alert("암호가 서로 다릅니다. 다시입력하세요");
+          return false;
+        }
+        return true;
+      }
 
-      <hr>
-      <div class="container">
-       <div class="row align-items-start">
-        <% prodata.forEach(function (item, index) { %>
-          <div class=col-4>
+    </script>
 
-         <div class="card border-primary mb-3" style="max-width: 18rem; max-height: 26rem">
-            <div class="card-header bg-transparent border-primary"><strong><%= item.pname %> </strong> <small> [<%= item.maker %>] </small></div>
-            <div class="card-body text-primary">
-                <div> <img class="img-fluid" src=<%=item.pic %> > </div>
-           <p class="card-text"> <%=item.comment %>
-            </div>
-            <div class="card-footer bg-transparent"><%= item.price %>원 &nbsp;&nbsp;&nbsp;&nbsp;<%= item.modelnum %> </div>
-            <div class="card-footer bg-transparent"><button type=button class="btn btn-primary" onclick="location.href='/product/purchase?modelnum=<%=item.modelnum%>'">구매하기</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                                 <button type=button class="btn btn-warning">구매후기</button> </div>
-          </div>
 
-          </div>
-       <% }); %>
-      </div>
-    </div>
 
-  <p>
-  <nav aria-label="...">
-  <ul class="pagination justify-content-center">
-    <li class="page-item disabled">
-      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-    </li>
-      <li class="page-item active" aria-current="page">
-      <a class="page-link" href="#">1 <span class="sr-only">(current)</span></a>
-    </li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item">
-      <a class="page-link" href="#">Next</a>
-    </li>
-  </ul>
-</nav>
+<div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+<div class="jumbotron" style="width:500px; margin:auto">
+
+<div class="bm-login-form" style='width:400px; margin-left:auto; margin-right:auto; border:1px'>
+
+  <div class="starter-template">
+    <h5> 회원정보수정</h5> <hr>
+  </div>
+
+ <form name=join onsubmit="return validate()" method=post action="/users/profile">
+   <div class="form-group">
+     <label for="exampleInputEmail1">아이디(이메일로 입력)</label>
+     <input type="email" class="form-control" name="uid" id="uid" aria-describedby="emailHelp" value="<%= id %>" readonly>
+   </div>
+   <div class="form-group">
+     <label for="exampleInputPassword1">암  호</label>
+     <input type="password" class="form-control" name="pw1" id="pw1" placeholder="암호는 최대20자까지 입력">
+   </div>
+   <div class="form-group">
+     <label for="exampleInputPassword2">한번더</label>
+     <input type="password" class="form-control" name="pw2" id="pw2" placeholder="암호를 한번더 입력해주세요">
+   </div>
+   <div class="form-group">
+     <label for="exampleInputName1">이름</label>
+     <input type="text" class="form-control" name="uname" id="uname" value="<%= reglabel %>" readonly>
+   </div>
+   <div class="form-group">
+     <label for="exampleInputPhone">휴대폰번호</label>
+     <input type="text" class="form-control" name="mobile" id="mobile" value="<%= mobile %>">
+   </div>
+  <div class="form-group">
+    <label for="exampleInputBirth">포인트</label>
+    <input type="text" class="form-control" name="point" id="point" value="<%= point %>" readonly>
+  </div>
+     <hr>
+     <button type="submit" class="btn btn-primary">정보수정</button>
+     <a href="/" class="btn btn-danger">취소</a>
+  </form>
+ </div>
+ </div>
+</div>
