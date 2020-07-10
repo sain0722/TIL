@@ -7,11 +7,12 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/layout_login"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:background="@drawable/ic_launcher_background"
+        android:background="@drawable/back1"
         >
         <LinearLayout
             android:layout_width="wrap_content"
@@ -20,7 +21,7 @@
             <TextView
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="@android:dimen/app_icon_size"
+                android:layout_margin="10dp"
                 android:text="로그인 화면"
                 android:textSize="25dp"
                 android:gravity="center" />
@@ -69,7 +70,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@android:dimen/app_icon_size" >
+            android:layout_marginTop="25dp" >
 
             <Button
                 android:layout_width="200dp"
@@ -85,6 +86,7 @@
             <Button
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:id="@+id/btn_signup"
                 android:text="SIGNUP"
                 android:background="#935300"
@@ -103,7 +105,13 @@
             android:id="@+id/chk_2"
             android:text="check2"
             />
-
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:id="@+id/btn_music"
+            android:text=">"
+            android:background="#00000000"
+            android:textColor="#ffffff" />
 
 
     </LinearLayout>

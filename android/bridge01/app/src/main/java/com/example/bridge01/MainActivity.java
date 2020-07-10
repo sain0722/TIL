@@ -2,6 +2,7 @@ package com.example.bridge01;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,12 +11,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextWatcher {
 
+    LinearLayout layout_login;
+
     Button btn_login;
     Button btn_signup;
+    Button btn_music;
     EditText et_text;
     CheckBox chk_1;
     CheckBox chk_2;
@@ -26,14 +31,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 배경화면 적용하는 코드
+//        layout_login = (LinearLayout)findViewById(R.id.layout_login);
+//        layout_login.setBackground(getResources().getDrawable(R.drawable.back2));
+
         btn_login = (Button)findViewById(R.id.btn_login);
         btn_login.setOnClickListener(this);
 
         btn_signup = (Button)findViewById(R.id.btn_signup);
         btn_signup.setOnClickListener(this);
 
+        btn_music = (Button)findViewById(R.id.btn_music);
+        btn_music.setOnClickListener(this);
+
         et_text = (EditText)findViewById(R.id.et_text);
-        et_text.setText("텍스트 설정");
+
         String str_view = et_text.getText().toString();
         et_text.addTextChangedListener(this);
 
@@ -47,7 +59,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(getApplicationContext(), "로그인 버튼을 클릭하였습니다.", Toast.LENGTH_LONG).show();
         }
         if (v.getId() == R.id.btn_signup) {
-            Toast.makeText(getApplicationContext(), "회원가입 버튼을 클릭하였습니다.", Toast.LENGTH_LONG).show();
+            Intent i = new Intent(this, SingupActivity.class);
+            startActivity(i);
         }
 
         if (v.getId() == R.id.chk_1) {
@@ -68,6 +81,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+        if(v.getId() == R.id.btn_music) {
+            Intent intent = new Intent(this, MyService.class);
+            startService(intent);
+        }
     }
 
 
