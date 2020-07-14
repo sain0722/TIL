@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(getApplicationContext(), "로그인 버튼을 클릭하였습니다.", Toast.LENGTH_LONG).show();
         }
         if (v.getId() == R.id.btn_signup) {
-            Intent i = new Intent(this, SingupActivity.class);
+            Intent i = new Intent(this, SignupActivity.class);
             startActivity(i);
         }
 

@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.bridge01;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -116,11 +116,10 @@ public class FireBaseDBManager {
         String id = (String)users.get("id") == null ? "" : (String)users.get("id");
         String pw = (String)users.get("password") == null ? "" : (String)users.get("password");
         String name = (String)users.get("name") == null ? "" : (String)users.get("name");
-        String gender = (String)users.get("gender") == null ? "0" : (String)users.get("gender");
         String hobby = (String)users.get("hobby") == null ? "" : (String)users.get("hobby");
         String phone = (String)users.get("phone") == null ? "" : (String)users.get("phone");
 
-        UserInfo info = new UserInfo(id, pw, name, Integer.parseInt(gender), hobby, phone);
+        UserInfo info = new UserInfo(id, pw, name, hobby, phone);
         return info;
     }
 
@@ -132,11 +131,10 @@ public class FireBaseDBManager {
             String id = (String)singleUser.get("id") == null ? "" : (String)singleUser.get("id");
             String pw = (String)singleUser.get("password") == null ? "" : (String)singleUser.get("password");
             String name = (String)singleUser.get("name") == null ? "" : (String)singleUser.get("name");
-            String gender = (String)singleUser.get("gender") == null ? "0" : (String)singleUser.get("gender");
             String hobby = (String)singleUser.get("hobby") == null ? "" : (String)singleUser.get("hobby");
             String phone = (String)singleUser.get("phone") == null ? "" : (String)singleUser.get("phone");
 
-            UserInfo info = new UserInfo(id, pw, name, Integer.parseInt(gender), hobby, phone);
+            UserInfo info = new UserInfo(id, pw, name, hobby, phone);
             user_list.add(info);
         }
         return user_list;
