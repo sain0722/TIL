@@ -20,5 +20,6 @@ ipython_config.py
 # datasets
 */dataset
 */datasets
+*/data
 */train
 */val
