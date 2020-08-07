@@ -1,4 +1,4 @@
-./prediction
-./prediction2
-./runs/*
+prediction.txt
+prediction2.txt
+runs/*
 *.pth
