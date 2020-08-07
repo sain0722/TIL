@@ -240,8 +240,6 @@ if __name__ == '__main__':
             # save model
             # if epoch % 500 == 0 :
 
-            save_model(str(name + 1), model, optimizer, scheduler)
-
             # train
             trainingAcc = validate(training_prediction, model, train_dataloader, train_label_file, cuda, 'Train')  # Modify
             # validate
@@ -254,6 +252,11 @@ if __name__ == '__main__':
             summary.add_scalar('ACC/test', testAcc, name) #Modify
 
             summary.add_scalar('ACC/train', trainingAcc, name)  # Modify
+
+            saved_name = str(name + 1) + "_" + comment
+
+            if testAcc > 0.96:
+                save_model(str(name + 1), model, optimizer, scheduler)
 
             elapsed = datetime.datetime.now() - time_
 
