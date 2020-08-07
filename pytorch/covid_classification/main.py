@@ -77,7 +77,7 @@ def save_model(model_name, model, optimizer, scheduler):
     # ========================= 수정 =======================
     # torch.save(state, os.path.join(model_name + '.pth'))
 
-    torch.save(state, os.path.join('./saved_model/' + model_name + '.pth'))
+    torch.save(state, os.path.join(model_name + '.pth'))
     print('model saved')
 
 
@@ -106,7 +106,9 @@ def printModified(comment, base_lr, gamma, batch, weight_decay):
 
 if __name__ == '__main__':
 
-    # set params
+    # ================================================================== #
+    #                         Setting Parameters                         #
+    # ================================================================== #
     lr = 0.00001
     epochs = 500
     bt = 8
@@ -121,7 +123,7 @@ if __name__ == '__main__':
     args.add_argument("--cuda", type=bool, default=True)
     args.add_argument("--num_epochs", type=int, default=epochs)
     args.add_argument("--print_iter", type=int, default=10)
-    args.add_argument("--model_name", type=str, default="./saved_model/166.pth")
+    args.add_argument("--model_name", type=str, default="model.pth")
     args.add_argument("--prediction_file", type=str, default="prediction.txt")
     args.add_argument("--batch", type=int, default=bt)
     args.add_argument("--mode", type=str, default="train")
@@ -166,7 +168,7 @@ if __name__ == '__main__':
     if init != 0:
         modelName = '{}.pth'.format(init)
         print(modelName)
-        load_model('saved_model/' + modelName, model)
+        load_model(modelName, model)
 
     if cuda:
         model = model.cuda()
@@ -257,6 +259,9 @@ if __name__ == '__main__':
 
             if testAcc > 0.96:
                 save_model(str(name + 1), model, optimizer, scheduler)
+
+            else:
+                print("Do not save model")
 
             elapsed = datetime.datetime.now() - time_
 
