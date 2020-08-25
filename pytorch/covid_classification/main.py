@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
+from torchvision.models import vgg19
 import argparse
 from dataloader import data_loader
 from evaluation import evaluation_metrics
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     #                         Setting Parameters                         #
     # ================================================================== #
     lr = 0.00001
-    epochs = 500
+    epochs = 25
     bt = 8
     gamma = float(0.8)
     weight_decay = float(1e-4)
@@ -146,6 +147,12 @@ if __name__ == '__main__':
 
     # create model
     model = Vgg19(num_classes=num_classes)
+    # model = vgg19(pretrained=True)
+    # for param in model.features.parameters():
+    #     param.requires_grad = False
+    #
+    # for i in model.parameters():
+    #     print(i.requires_grad)
     # model = DataParallel(model)
 
     # 폴더 생성 코드
@@ -190,9 +197,9 @@ if __name__ == '__main__':
         scheduler = StepLR(optimizer, step_size=40, gamma=gamma)
 
         # get data loader
-        train_dataloader, train_label_file = data_loader(root=DATASET_PATH, phase='train', batch_size=batch) # Modifiy
+        train_dataloader, train_label_file = data_loader(root=DATASET_PATH, phase='train', batch_size=batch) # Modify
         validate_dataloader, validate_label_file = data_loader(root=DATASET_PATH, phase='validate', batch_size=batch)
-        test_dataloader, test_label_file = data_loader(root=DATASET_PATH, phase='test', batch_size=batch) # Modifiy
+        test_dataloader, test_label_file = data_loader(root=DATASET_PATH, phase='test', batch_size=batch) # Modify
 
         time_ = datetime.datetime.now()
         num_batches = len(train_dataloader)
@@ -214,13 +221,14 @@ if __name__ == '__main__':
             time_ = datetime.datetime.now()
             model.train()
             name = init + epoch
+            print("1: ", len(train_dataloader) * 8)
             for iter_, data in enumerate(train_dataloader):
+
                 # fetch train data
                 _, image, is_label = data
                 if cuda:
                     image = image.cuda()
                     is_label = is_label.cuda()
-
                 # update weight
                 pred = model(image)
                 loss = loss_fn(pred, is_label)
@@ -255,10 +263,10 @@ if __name__ == '__main__':
 
             summary.add_scalar('ACC/train', trainingAcc, name)  # Modify
 
-            saved_name = str(name + 1) + "_" + comment
+            saved_name = comment + "_" + str(name + 1)
 
             if testAcc > 0.96:
-                save_model(str(name + 1), model, optimizer, scheduler)
+                save_model(saved_name, model, optimizer, scheduler)
 
             else:
                 print("Do not save model")
@@ -268,7 +276,7 @@ if __name__ == '__main__':
             # print modified hyper parameter
             printModified(comment, base_lr, gamma, batch, weight_decay)
 
-            print('[epoch {}] elapsed: {}'.format(name + 1, elapsed)) #Modify
+            print('[epoch {}] elapsed: {}'.format(name + 1, elapsed)) # Modify
 
         end_time = datetime.datetime.now()
         print("Total Elapsed Time: {}".format(end_time - start_time))

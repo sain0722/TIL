@@ -39,7 +39,8 @@ class Vgg19(torch.nn.Module):
             nn.Conv2d(256, 256, 3, padding=1),
             nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True),
             nn.ReLU(inplace=True),
-        )
+            )
+
 
         self.conv4 = nn.Sequential(
             nn.MaxPool2d(2, stride=2, ceil_mode=True),  # 1/8
@@ -56,23 +57,23 @@ class Vgg19(torch.nn.Module):
             nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
             nn.ReLU(inplace=True)
         )
-        #
-        # self.conv5 = nn.Sequential(
-        #     nn.MaxPool2d(2, stride=2, ceil_mode=True),  # 1/16
-        #     nn.Conv2d(512, 512, 3, padding=1),
-        #     nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
-        #     nn.ReLU(inplace=True),
-        #     nn.Conv2d(512, 512, 3, padding=1),
-        #     nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
-        #     nn.ReLU(inplace=True),
-        #     nn.Conv2d(512, 512, 3, padding=1),
-        #     nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
-        #     nn.ReLU(inplace=True),
-        #     nn.Conv2d(512, 512, 3, padding=1),
-        #     nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
-        #     nn.ReLU(inplace=True),
-        #     nn.MaxPool2d(2, stride=2, ceil_mode=False)
-        # )
+
+        self.conv5 = nn.Sequential(
+            nn.MaxPool2d(2, stride=2, ceil_mode=True),  # 1/16
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, 3, padding=1),
+            nn.BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, stride=2, ceil_mode=False)
+        )
 
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
 
@@ -108,7 +109,7 @@ class Vgg19(torch.nn.Module):
         h = self.conv2(h)
         h = self.conv3(h)
         h = self.conv4(h)
-#        h = self.conv5(h)
+        h = self.conv5(h)
 
         pool = self.avgpool(h)
         flatten = torch.flatten(pool, 1)

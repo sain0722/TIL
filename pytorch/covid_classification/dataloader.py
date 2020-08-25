@@ -10,10 +10,14 @@ def get_transform(resize=64, method=Image.BILINEAR):
     if resize > 0:
         size = [resize, resize]
         transform_list.append(transforms.Resize(size, method))
+    transform_list.append(transforms.RandomVerticalFlip())
+    transform_list.append(transforms.RandomHorizontalFlip())
 
     transform_list.append(transforms.ToTensor())
     transform_list.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
     return transforms.Compose(transform_list)
+
 
 class CustomDataset(data.Dataset):
     def __init__(self, root, phase='train'):
@@ -58,6 +62,7 @@ class CustomDataset(data.Dataset):
     def get_label_file(self):
         return self.label_path
 
+
 def data_loader(root, phase='train', batch_size=16):
     if phase == 'train':
         shuffle = True
@@ -66,4 +71,7 @@ def data_loader(root, phase='train', batch_size=16):
 
     dataset = CustomDataset(root, phase)
     dataloader = data.DataLoader(dataset=dataset, batch_size=batch_size, shuffle=shuffle)
+    print(phase, "data len")
+    print(dataset.__len__())
+
     return dataloader, dataset.get_label_file()
