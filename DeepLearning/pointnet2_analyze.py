@@ -120,6 +120,11 @@ def train():
             pointclouds_pl, labels_pl = MODEL.placeholder_inputs(BATCH_SIZE, NUM_POINT)
             is_training_pl = tf.placeholder(tf.bool, shape=())
 
+
+            # global_step = batch --> parameter to minimize.
+            # optimizer가 'batch' parameter를 유용하게 증가시키는 것.
+            # train 될 때마다 한다.
+
             # Note the global_step=batch parameter to minimize.
             # That tells the optimizer to helpfully increment the 'batch' parameter
             # for you every time it trains.
