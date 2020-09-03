@@ -1,19 +1,21 @@
 import tensorflow as tf
 
+
+# YOUR CODE SHOULD START HERE
+class myCallback(tf.keras.callbacks.Callback):
+
+    def on_epoch_end(self, epoch, logs={}):
+        if logs.get('acc') > 0.99:
+            print("\n Reached 99% Accuracy so cancelling Training!")
+            self.model.stop_training = True
+# YOUR CODE SHOULD END HERE
+
+
 # GRADED FUNCTION: train_mnist
 def train_mnist():
     # Please write your code only where you are indicated.
     # please do not remove # model fitting inline comments.
 
-    # YOUR CODE SHOULD START HERE
-    class myCallback(tf.keras.callbacks.Callback):
-
-        def on_epoch_end(self, epoch, logs={}):
-            if logs.get('acc') > 0.99:
-                print("\n Reached 99% Accuracy so cancelling Training!")
-                self.model.stop_training = True
-
-    # YOUR CODE SHOULD END HERE
 
     mnist = tf.keras.datasets.mnist
 
@@ -42,4 +44,6 @@ def train_mnist():
     # model fitting
     return history.epoch, history.history['acc'][-1]
 
-train_mnist()
+
+if __name__ == "__main__":
+    train_mnist()
