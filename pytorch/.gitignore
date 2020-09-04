@@ -18,13 +18,8 @@ ipython_config.py
 # End of https://www.toptal.com/developers/gitignore/api/jupyternotebooks
 
 # datasets
-*/dataset
-*/datasets
 */data/*
-*/train
-*/val
-*/Positive
-*/Negative
+
 
 #################################################################
 
@@ -180,10 +175,3 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-
-
-
-# Custom
-
-*.pth
-runs

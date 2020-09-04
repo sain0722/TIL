@@ -1,0 +1,4 @@
+./prediction.txt
+./prediction2.txt
+./runs/*
+./*.pth
