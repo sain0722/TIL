@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
 
-
 class myCallback(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs={}):
