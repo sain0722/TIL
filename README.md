@@ -1,5 +1,12 @@
-# Today I Learned
+# 2020 후반기
 
+- Tensorflow
+
+- PyTorch
+
+--- 
+
+# 2020 전반기
 - G브릿지
   - Node.js를 이용한 쇼핑몰 예제  
   - 안드로이드 앱개발(JAVA)
