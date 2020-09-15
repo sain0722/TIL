@@ -1,8 +1,10 @@
 # 2020 후반기
 
 - Tensorflow
-
+  - 자격증 준비
 - PyTorch
+  - 기본 문법
+- cs231n
 
 --- 
 
