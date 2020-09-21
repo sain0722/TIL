@@ -1,9 +1,9 @@
 # Create smaller dataset for Dogs vs. Cats
 import os, shutil
 
-original_dataset_dir = '/Users/macbook/dogs_cats_dataset/train/'
+original_dataset_dir = 'C:/Users/user/data/'
 
-base_dir = '/Users/macbook/book/dogs_cats/data'
+base_dir = 'C:/Users/user/data/'
 if not os.path.exists(base_dir):
     os.mkdir(base_dir)
 
