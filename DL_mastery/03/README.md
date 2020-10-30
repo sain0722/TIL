@@ -10,6 +10,8 @@ OpenCV를 이용하여 Document Scanner를 Build하기 위해서 세 가지 Step
 **OpenCV and Python version:**
 This example will run on **Python 2.7/3+** and **OpenCV 2.4/3+**
 
+`python scan.py -i images/example_01.jpg`
+
 ## Step 1: Edge Detection
 
 ```python
