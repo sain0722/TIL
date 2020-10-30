@@ -144,7 +144,7 @@ if __name__ == '__main__':
     print('Finished Training')
 
     # 학습한 모델 save
-    PATH = './cifar_net.pth'
+    PATH = '../cifar_net.pth'
     torch.save(net.state_dict(), PATH)
 
     # 5. 시험용 데이터로 신경망 검사
