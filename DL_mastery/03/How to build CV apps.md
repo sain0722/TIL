@@ -24,7 +24,8 @@ This example will run on **Python 2.7/3+** and **OpenCV 2.4/3+**
 `gray = cv2.GaussianBlur(gray, (5, 5), 0)`  
 `edged = cv2.Canny(gray, 75, 200)`  
 
-[이미지 파일]
+![Original Image](images/example_05.jpg "Original Image")
+![Original Image](images/step1.jpg "Step 1 Image")
 
 ## Step 2: Finding Contours (윤곽선 찾기)
 
@@ -67,7 +68,7 @@ cv2.destroyAllWindows()
 
 4개의 Point를 찾아냈으므로, `drawContours`로 해당 포인트들을 잇는다.
 
-[Outline 이미지]
+![step2 Image](images/step2.jpg)
 
 ## Step 3: Apply a Perspective Transform & Threshold (원근 변환 및 Threshold 적용)
 
@@ -101,4 +102,4 @@ edge detection을 수행하고, height=500 pixel에서 윤곽선(contours)을 �
 
 이미지에 흑백 느낌을 위해 warped image를 가져와 gray scale로 변환하고, adaptive threshold를 적용한다.
 
-[Step3]
+![step3 Image](images/step3.jpg)
