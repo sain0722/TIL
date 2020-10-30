@@ -46,7 +46,7 @@ cv2.destroyAllWindows()
 `gray = cv2.GaussianBlur(gray, (5, 5), 0)`  
 `edged = cv2.Canny(gray, 75, 200)`  
 
-![Original Image](images/example_05.jpg "Original Image")
+![Original Image](images/example_01.jpg "Original Image")
 ![Original Image](images/step1.jpg "Step 1 Image")
 
 ## Step 2: Finding Contours (윤곽선 찾기)
