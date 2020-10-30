@@ -12,6 +12,26 @@ This example will run on **Python 2.7/3+** and **OpenCV 2.4/3+**
 
 ## Step 1: Edge Detection
 
+```python
+# load the image and compute the ratio of the old height
+# to the new height, clone it, and resize it
+image = cv2.imread(args["image"])
+ratio = image.shape[0] / 500.0
+orig = image.copy()
+image = imutils.resize(image, height = 500)
+# convert the image to grayscale, blur it, and find edges
+# in the image
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+gray = cv2.GaussianBlur(gray, (5, 5), 0)
+edged = cv2.Canny(gray, 75, 200)
+# show the original image and the edge detected image
+print("STEP 1: Edge Detection")
+cv2.imshow("Image", image)
+cv2.imshow("Edged", edged)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+```
+
 - 이미지 로드:  
 `image = cv2.imread(args["image"])`
 - 이미지 처리 속도를 높이고, edge detection을 보다 정확하게 만들기 위해 높이가 500pixel이 되도록 조정한다:  
