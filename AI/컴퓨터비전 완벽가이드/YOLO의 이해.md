@@ -1,6 +1,6 @@
 # YOLO(You Only Look Once)
 
-## YOLO의 이해 01 - YOLO 개요와 YOLO Version 1 상세
+# YOLO의 이해 01 - YOLO 개요와 YOLO Version 1 상세
 
 `Speed + Accuracy`  
 
@@ -60,3 +60,81 @@ But, Anchor Box기반이 아님. 해당 Cell이 Box를 추측을 해나가는 �
 ## Issue
 Detection 시간은 빠르나, 성능이 떨어짐. 특히 작은 Object에 대한 성능이 나쁨.
 
+# YOLO의 이해 01 - YOLO 개요와 YOLO Version 2 상세
+
+## YOLO - v1, v2, v3 비교
+
+|항목|v1|v2|v3|
+|:---:|:---:|:---:|:---:|
+|Feature Extractor|Inception 변형|Darknet 19|Darknet 53|
+|Grid당 Anchor Box 수|2개|5개|Output Feature Map당 3개, 서로 다른 크기와 스케일로 총 9개|
+|Anchor Box 결정 방법||K-Means Clustering|K-Means Clustering|
+|Output Feature Map 크기  (Depth 제외)||13x13|13x13, 26x26, 52x52 3개의 Feature Map 사용|
+|Feature Map Scaling 기법|||FPN(Feature Pyramid Network)|
+
+> YOLO v2의 가장 큰 변화: Anchor Box 기반의 Object Detection을 한다!  
+> Anchor Box 크기와 Ratio를 구할 때, 고정된 사이즈나 Ratio가 아닌, K-means Clustering을 이용하여 이미지 안에 있는 Object들의 GT Box를 분석하여 군집화를 통해 결정한다.  
+> v2: 13x13 Feature map에 Anchor Box 5개가 개별 Grid 별로 적용이 됨. (Depth 제외)  
+> v3: 13x13, 26x26, 52x52 3개의 Feature map으로 각각 서로다른 output size를 가지고 Feature Map Scaling -> FPN을 사용함.  
+
+## YOLO-v2 Detection 시간 및 성능
+
+![image](https://user-images.githubusercontent.com/52433248/116510275-a1d2b680-a8ff-11eb-8ec8-1bb8d5be6a2b.png)
+
+
+> SSD보다 더 빠르다.  
+> Detection 성능은 SSD보다 낮다.  
+> Small Object에서도 성능차이  
+> 
+
+## YOLO v2의 특징
+
+- Batch Normalization
+- High Resolution Classifier : Network의 Classifer 단을 보다 높은 resolution(448x448)로 fine tuning.
+- **13x13 feature map 기반에서 개별 Grid cell별 5개의 Anchor box에서 Object Detection**
+- Darknet-19 Classification 모델 채택
+- 서로 다른 크기의 image들로 Network 학습
+
+> Batch Normalization을 네트워크에 붙여 사용하였음.  
+> v2에서도 처음엔 224x224로 하다가, 448x448로 fine tuning을 하여 좀 더 resolution을 높였더니 mAP 상승!  
+> SSD하고 유사하게, Anchor Box 기반으로 Object Detection을 진행함. SSD와 다른 점은 Multi-Scale Feature Map이지만, YOLO-v2는 13x13 Feature map 기반.  
+> 독자적인 Darknet-19 모델 채택  
+> 작은 Object에 대한 Detection 성능을 높이기 위해, 서로 다른 크기의 이미지를 학습시키는 것으로 해결하려는 노력  
+> 
+
+## YOLO v2 Network 구조
+
+![image](https://user-images.githubusercontent.com/52433248/116510328-b616b380-a8ff-11eb-9cfc-c97a51725adb.png)
+
+> v1의 Fully Connected 부분이 없어지고, Convolution 구조로 바뀜.  
+> 13x13 Feature map에 대해서 Anchor box별로 Object Detection 수행.
+> 
+
+## YOLO v2 Anchor Box로 1 Cell에서 여러개 Object Detection
+
+SSD와 마찬가지로 1개의 cell에서 여러 개의 Anchor를 통해 개별 Cell에서 여러 개 Object Detection 가능  
+K-Means Clustering을 통해 데이터 세트의 이미지 크기와 Shape Ratio에 따른 5개의 군집화 분류를 하여 Anchor Box 계산.  
+
+![image](https://user-images.githubusercontent.com/52433248/116510837-861be000-a900-11eb-9c5f-0e451a2238f8.png)
+
+
+> 한 Cell에서 여러 개의 Object Detection이 가능.  
+> 이전 v1에서는 Grid Cell이 Object Detection의 주체였기 때문에, 한 Cell에서 하나의 Object만 Detect 가능했었음.  
+> 이제는 Anchor Box 기반으로 하기 때문에, 각 cell의 중심을 기준으로 5개의 Anchor Box가 만들어진다.  
+> Anchor Box의 크기와 Ratio는 K-Means Clustering을 통해 GT의 크기들을 군집화하여 결정한다.  
+> 
+
+## YOLO v2 Output Feature Map
+
+> 13x13 각 Grid Cell 별로 5개의 Anchor Box 생성  
+> Anchor Box에서는 Bounding Box별 25개의 정보를 담고 있음.  
+> 5개니까 125개가 됨 = depth=125 -> 13 x 13 x 125 (Output Feature map)
+> 
+```
+$$
+Box coordinates(t_x, t_y, t_w, t_h), 
+Objectness Score(P_o), 
+Class Scores(p_1, ... , p_c) 
+X B
+$$
+```
