@@ -60,7 +60,7 @@ But, Anchor Box기반이 아님. 해당 Cell이 Box를 추측을 해나가는 �
 ## Issue
 Detection 시간은 빠르나, 성능이 떨어짐. 특히 작은 Object에 대한 성능이 나쁨.
 
-# YOLO의 이해 01 - YOLO 개요와 YOLO Version 2 상세
+# YOLO의 이해 02 - YOLO 개요와 YOLO Version 2 상세
 
 ## YOLO - v1, v2, v3 비교
 
@@ -138,3 +138,75 @@ Class Scores(p_1, ... , p_c)
 X B
 $$
 ```
+
+# YOLO의 이해 03 - YOLO 개요와 YOLO Version 3 상세
+
+## One Stage Detector
+
+시간순으로 정렬  
+YOLO v1 -> SSD -> YOLO v2 -> (Feature Pyramid Network) -> RetinaNet -> YOLO v3  
+
+> FPN : Feature Extractor  
+> FPN + Focal Loss = RetinaNet  
+> YOLO v3: 앞의 모델들의 장점을 융합한 것  
+> 
+
+## YOLO v3 특징
+- Feature Pyramid Network와 유사한 기법을 적용하여 3개의 Feature Map Output에서 각각 3개의 서로 다른 크기와 scale을 가진 anchor box로 Detection
+- 보다 높은 Classification을 가지는 Darknet-53
+- Multi Labels 예측: Softmax가 아닌 Sigmoid 기반의 Logistic Classifier로 개별 Object의 Multi Labels 예측  
+
+> 서로 다른 크기의 Feature Map (13x13, 26x26, 52x52) 3개를 만들고, 서로 다른 크기를 가진 Anchor Box를 3개씩 만들게 된다.  
+> 총 9개의 서로 다른 Anchor Box가 만들어지게 됨.
+> Darknet-53 채택  
+> Multi Labels 예측: Object Detection은 Class가 하나인 경우가 많지만, Open Image같은 경우에는 person-woman과 같은 multi-labels이 있음.  
+> 간단히 말해서 Softmax -> Logistic Regression
+> 
+
+## YOLO v3 Network 구조
+
+ ![YOLO-v3_Network](https://miro.medium.com/max/1000/1*d4Eg17IVJ0L41e7CTWLLSg.png)
+
+> DarkNet에도 ResNet과 비슷하게 Skip-Connection과 같이 되어있는 부분이 일부 있음.  
+> 61 -> 79 layer로 갈 때, Feature map size가 줄어들어있음.  
+> 82번 layer: 13x13 Feature Map. 여기에서 다른 유형의 3개의 Anchor Box 생성.  
+> 79번에서 다시 횡으로 가면, upsampling이 된다. -> Feature Map의 크기가 두배로 커지게 됨.  
+> 그 다음에 61번 layer에서 skip-connection이 되면서, 줄어들기 전의 정보가 들어가게 된다.  
+> 그리고 그것들이 다 합쳐져서 91번 layer에서 94번 layer까지 가서 26x26의 Feature Map.  
+> 그리고 또 upsampling해서 36번 layer에서 정보를 전달한다.  
+> 106번 layer: 52x52 Feature Map.  
+
+> 주로, YOLO는 416x416으로 Input Image를 받는다.  
+
+## YOLO와 SSD의 비교
+
+> 유사한 부분이 많지만, Feature Pyramid 기법으로 Skip-Connection으로 앞단의 Layer에서 위치정보를 전달해주는 차이가 있음.
+> 
+
+## YOLO v3 Output Feature Map
+
+각 Feature Map마다 3개의 서로 다른 Anchor box.  
+```
+- Box 좌표(t_x, t_y, t_w, t_h)
+- Objectness Score(p_o)
+- Class Scores(p_1 ... p_c)
+  - COCO dataset 사용으로 c=80, 80개의 스코어
+```
+- 13x13 Feature Map
+  - 13x13x3x85
+- 26x26 Feature Map
+  - 26x26x3x85
+- 52x52 Feature Map
+  - 52x52x3x85
+
+## Darknet-53 특성
+
+> v2->v3으로 가면서, 속도를 조금 낮추더라도 성능을 개선시켜보자는 의도.  
+> ResNet과 유사한 구조. 왜 DarkNet을 별도로 만들었는가??  
+> Detection 시간을 줄이기 위한 노력.  
+> ResNet-152와 성능은 거의 유사한데, 속도가 훨씬 더 빠르다.  
+> 
+
+## Training
+
+multi-scale
