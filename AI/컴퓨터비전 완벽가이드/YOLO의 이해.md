@@ -1,6 +1,6 @@
 # YOLO(You Only Look Once)
 
-## YOLO의 이해 01 - YOLO 개요와 YOLO Version 1 상세
+# YOLO의 이해 01 - YOLO 개요와 YOLO Version 1 상세
 
 `Speed + Accuracy`  
 
@@ -60,3 +60,153 @@ But, Anchor Box기반이 아님. 해당 Cell이 Box를 추측을 해나가는 �
 ## Issue
 Detection 시간은 빠르나, 성능이 떨어짐. 특히 작은 Object에 대한 성능이 나쁨.
 
+# YOLO의 이해 02 - YOLO 개요와 YOLO Version 2 상세
+
+## YOLO - v1, v2, v3 비교
+
+|항목|v1|v2|v3|
+|:---:|:---:|:---:|:---:|
+|Feature Extractor|Inception 변형|Darknet 19|Darknet 53|
+|Grid당 Anchor Box 수|2개|5개|Output Feature Map당 3개, 서로 다른 크기와 스케일로 총 9개|
+|Anchor Box 결정 방법||K-Means Clustering|K-Means Clustering|
+|Output Feature Map 크기  (Depth 제외)||13x13|13x13, 26x26, 52x52 3개의 Feature Map 사용|
+|Feature Map Scaling 기법|||FPN(Feature Pyramid Network)|
+
+> YOLO v2의 가장 큰 변화: Anchor Box 기반의 Object Detection을 한다!  
+> Anchor Box 크기와 Ratio를 구할 때, 고정된 사이즈나 Ratio가 아닌, K-means Clustering을 이용하여 이미지 안에 있는 Object들의 GT Box를 분석하여 군집화를 통해 결정한다.  
+> v2: 13x13 Feature map에 Anchor Box 5개가 개별 Grid 별로 적용이 됨. (Depth 제외)  
+> v3: 13x13, 26x26, 52x52 3개의 Feature map으로 각각 서로다른 output size를 가지고 Feature Map Scaling -> FPN을 사용함.  
+
+## YOLO-v2 Detection 시간 및 성능
+
+![image](https://user-images.githubusercontent.com/52433248/116510275-a1d2b680-a8ff-11eb-8ec8-1bb8d5be6a2b.png)
+
+
+> SSD보다 더 빠르다.  
+> Detection 성능은 SSD보다 낮다.  
+> Small Object에서도 성능차이  
+> 
+
+## YOLO v2의 특징
+
+- Batch Normalization
+- High Resolution Classifier : Network의 Classifer 단을 보다 높은 resolution(448x448)로 fine tuning.
+- **13x13 feature map 기반에서 개별 Grid cell별 5개의 Anchor box에서 Object Detection**
+- Darknet-19 Classification 모델 채택
+- 서로 다른 크기의 image들로 Network 학습
+
+> Batch Normalization을 네트워크에 붙여 사용하였음.  
+> v2에서도 처음엔 224x224로 하다가, 448x448로 fine tuning을 하여 좀 더 resolution을 높였더니 mAP 상승!  
+> SSD하고 유사하게, Anchor Box 기반으로 Object Detection을 진행함. SSD와 다른 점은 Multi-Scale Feature Map이지만, YOLO-v2는 13x13 Feature map 기반.  
+> 독자적인 Darknet-19 모델 채택  
+> 작은 Object에 대한 Detection 성능을 높이기 위해, 서로 다른 크기의 이미지를 학습시키는 것으로 해결하려는 노력  
+> 
+
+## YOLO v2 Network 구조
+
+![image](https://user-images.githubusercontent.com/52433248/116510328-b616b380-a8ff-11eb-9cfc-c97a51725adb.png)
+
+> v1의 Fully Connected 부분이 없어지고, Convolution 구조로 바뀜.  
+> 13x13 Feature map에 대해서 Anchor box별로 Object Detection 수행.
+> 
+
+## YOLO v2 Anchor Box로 1 Cell에서 여러개 Object Detection
+
+SSD와 마찬가지로 1개의 cell에서 여러 개의 Anchor를 통해 개별 Cell에서 여러 개 Object Detection 가능  
+K-Means Clustering을 통해 데이터 세트의 이미지 크기와 Shape Ratio에 따른 5개의 군집화 분류를 하여 Anchor Box 계산.  
+
+![image](https://user-images.githubusercontent.com/52433248/116510837-861be000-a900-11eb-9c5f-0e451a2238f8.png)
+
+
+> 한 Cell에서 여러 개의 Object Detection이 가능.  
+> 이전 v1에서는 Grid Cell이 Object Detection의 주체였기 때문에, 한 Cell에서 하나의 Object만 Detect 가능했었음.  
+> 이제는 Anchor Box 기반으로 하기 때문에, 각 cell의 중심을 기준으로 5개의 Anchor Box가 만들어진다.  
+> Anchor Box의 크기와 Ratio는 K-Means Clustering을 통해 GT의 크기들을 군집화하여 결정한다.  
+> 
+
+## YOLO v2 Output Feature Map
+
+> 13x13 각 Grid Cell 별로 5개의 Anchor Box 생성  
+> Anchor Box에서는 Bounding Box별 25개의 정보를 담고 있음.  
+> 5개니까 125개가 됨 = depth=125 -> 13 x 13 x 125 (Output Feature map)
+> 
+```
+$$
+Box coordinates(t_x, t_y, t_w, t_h), 
+Objectness Score(P_o), 
+Class Scores(p_1, ... , p_c) 
+X B
+$$
+```
+
+# YOLO의 이해 03 - YOLO 개요와 YOLO Version 3 상세
+
+## One Stage Detector
+
+시간순으로 정렬  
+YOLO v1 -> SSD -> YOLO v2 -> (Feature Pyramid Network) -> RetinaNet -> YOLO v3  
+
+> FPN : Feature Extractor  
+> FPN + Focal Loss = RetinaNet  
+> YOLO v3: 앞의 모델들의 장점을 융합한 것  
+> 
+
+## YOLO v3 특징
+- Feature Pyramid Network와 유사한 기법을 적용하여 3개의 Feature Map Output에서 각각 3개의 서로 다른 크기와 scale을 가진 anchor box로 Detection
+- 보다 높은 Classification을 가지는 Darknet-53
+- Multi Labels 예측: Softmax가 아닌 Sigmoid 기반의 Logistic Classifier로 개별 Object의 Multi Labels 예측  
+
+> 서로 다른 크기의 Feature Map (13x13, 26x26, 52x52) 3개를 만들고, 서로 다른 크기를 가진 Anchor Box를 3개씩 만들게 된다.  
+> 총 9개의 서로 다른 Anchor Box가 만들어지게 됨.
+> Darknet-53 채택  
+> Multi Labels 예측: Object Detection은 Class가 하나인 경우가 많지만, Open Image같은 경우에는 person-woman과 같은 multi-labels이 있음.  
+> 간단히 말해서 Softmax -> Logistic Regression
+> 
+
+## YOLO v3 Network 구조
+
+ ![YOLO-v3_Network](https://miro.medium.com/max/1000/1*d4Eg17IVJ0L41e7CTWLLSg.png)
+
+> DarkNet에도 ResNet과 비슷하게 Skip-Connection과 같이 되어있는 부분이 일부 있음.  
+> 61 -> 79 layer로 갈 때, Feature map size가 줄어들어있음.  
+> 82번 layer: 13x13 Feature Map. 여기에서 다른 유형의 3개의 Anchor Box 생성.  
+> 79번에서 다시 횡으로 가면, upsampling이 된다. -> Feature Map의 크기가 두배로 커지게 됨.  
+> 그 다음에 61번 layer에서 skip-connection이 되면서, 줄어들기 전의 정보가 들어가게 된다.  
+> 그리고 그것들이 다 합쳐져서 91번 layer에서 94번 layer까지 가서 26x26의 Feature Map.  
+> 그리고 또 upsampling해서 36번 layer에서 정보를 전달한다.  
+> 106번 layer: 52x52 Feature Map.  
+
+> 주로, YOLO는 416x416으로 Input Image를 받는다.  
+
+## YOLO와 SSD의 비교
+
+> 유사한 부분이 많지만, Feature Pyramid 기법으로 Skip-Connection으로 앞단의 Layer에서 위치정보를 전달해주는 차이가 있음.
+> 
+
+## YOLO v3 Output Feature Map
+
+각 Feature Map마다 3개의 서로 다른 Anchor box.  
+```
+- Box 좌표(t_x, t_y, t_w, t_h)
+- Objectness Score(p_o)
+- Class Scores(p_1 ... p_c)
+  - COCO dataset 사용으로 c=80, 80개의 스코어
+```
+- 13x13 Feature Map
+  - 13x13x3x85
+- 26x26 Feature Map
+  - 26x26x3x85
+- 52x52 Feature Map
+  - 52x52x3x85
+
+## Darknet-53 특성
+
+> v2->v3으로 가면서, 속도를 조금 낮추더라도 성능을 개선시켜보자는 의도.  
+> ResNet과 유사한 구조. 왜 DarkNet을 별도로 만들었는가??  
+> Detection 시간을 줄이기 위한 노력.  
+> ResNet-152와 성능은 거의 유사한데, 속도가 훨씬 더 빠르다.  
+> 
+
+## Training
+
+multi-scale
