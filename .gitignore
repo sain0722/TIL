@@ -187,3 +187,4 @@ fabric.properties
 
 *.pth
 runs
+*.ipynb
