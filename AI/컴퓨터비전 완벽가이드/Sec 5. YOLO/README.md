@@ -210,3 +210,70 @@ YOLO v1 -> SSD -> YOLO v2 -> (Feature Pyramid Network) -> RetinaNet -> YOLO v3
 ## Training
 
 multi-scale
+
+# GPU를 활용한 Object Detection 모델의 Training 수행 시 유의사항
+
+대량의 이미지 학습 시 유의사항  
+- 개별 이미지를 배열(Tensor)로 변환해야함.
+- 예를 들어, 500x500 이미지라면, 500x500x3 -> 250k x 3
+- 개별 이미지 하나씩 넣으면, 메모리 문제 발생!
+- GPU를 사용하는 이유 중 하나가, __batch 처리__가 가능하다.
+- 이미지 개수가 1000개라고 하면, 1000 x [500x500x3] 을 CNN에 한방에 집어넣을 수 있다.
+- 하지만, 이건 메모리 초과. -> Keras에서는 `fit_generator()`를 이용하여 학습
+- 1000장의 이미지가 있으면, batch_size=10 -> 10장의 이미지만 변환을 해서 네트워크의 입력으로 넣고, 이 작업을 100회 반복.
+
+
+## Python Generator
+
+![image](https://user-images.githubusercontent.com/52433248/116851817-17a38e80-ac2e-11eb-9fdd-cb28d7014be1.png)
+
+- Caller
+  - 일반 함수
+    - 일반 함수 def A는 자신의 로직을 수행하고, return을 caller에게 한다.
+    - 가령, 일반함수가 리턴하는 값이 10만개(큰 값)라고 한다면, Caller가 10만개를 받아서 처리를 하기에는 메모리 사이즈가 너무 부족하다.
+    - return하면 종료.
+  - Generator 함수
+    - Caller가 함수를 호출.
+    - 작업을 수행하다가, yield라는 키워드를 만남. yield에서 1000개의 array라고 지정이 되어있다면, 1000개에 해당하는 값을 caller에게 반환.
+    - caller는 1000개를 처리한 뒤에 함수를 다시 호출하여 다음 step으로 감.
+    - 다시 yield를 만나면, caller로 감.
+    - Generator는 Caller에게 반환을 해도, 종료되지 않음.
+    - __함수 내 로직을 수행 후 값을 반환하고 종료하는 것이 아니라, yield로 값을 순차적으로 반환하면서 메모리를 절약할 수 있게 만듦.__
+
+## Keras fit_generator()를 이용한 학습
+
+Python Generator를 적용.  
+- batch_size를 늘리면 속도가 무조건 빨라진다? -> NO
+- 이미지 사이즈가 하드웨어의 제약을 받듯이, batch size도 하드웨어의 제약을 받음.
+- batch_size = 10 -> 100
+  - 100장의 이미지를 네트워크에 집어넣으면, 병목이 걸림
+  - batch size 설정은 cpu코어 및 gpu 메모리 등의 균형을 맞춰서 설정
+
+#### Data Generator
+
+```python
+from keras.preprocessing.image import ImageDataGenerator
+
+# 학습용/검증용 data generator 생성
+train_datagen = ImageDataGenerator(rescale=1./255)
+train_generator = train_datagen.flow_from_directory('/path/to/train_image', target_size=(240, 240), batch_size=10, class_mode='categorical')
+valid_datagen = ImageDataGenerator(rescale=1./255)
+valid_generator = train_datagen.flow_from_directory('/path/to/valid_image', target_size=(240, 240), batch_size=10, class_mode='categorical')
+
+# 모델 생성
+model = Sequential([
+  Conv2D(32, (3, 3), activation='relu', input_shape=(240, 240, 3)),
+  ...
+  Dense(3, activation='softmax')
+])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# data generator를 이용한 학습
+model.fit_generator(train_generator, steps_per_epoch=100, epochs=10, validation_data=valid_generator, validation_steps=2)
+```
+
+## Object Detection 모델에서 Batch size 설정
+
+- Batch size가 크다고 무조건 수행 속도를 향상시키지 않음.
+- Batch size가 너무 크면 GPU 메모리 부족 문제를 가져오고 학습이 되지 않음.(OOM, Segment Fault)
+- CPU 4코어, GPU P100 서버 기준, Batch size 4~8이 적합.
