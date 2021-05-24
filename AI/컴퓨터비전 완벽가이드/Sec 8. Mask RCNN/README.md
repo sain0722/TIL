@@ -26,4 +26,19 @@
 
 = Faster R-CNN + FCN 
 
+- Faster R-CNN 부분에서 Bounding box regression + Classification 진행
+- FCN 영역에서 binary masking 진행.
+  - FCN: pixel-wise classification
+  - classification은 faster r-cnn 부분에서 진행하고, binary masking은 binary mask prediction으로 수행
+
+#### Mask RCNN
+- Faster RCNN 과 FCN 기법 개선 및 결합
+  - ROI-Align
+  - 기존 Bounding box regression과 Classification에 Binary Mask Prediction 추가
+- 비교적 빠른 Detection 시간과 높은 정확도
+- 직관적이고 상대적으로 쉬운 구현
+
+#### Mask RCNN 구조
+
+
 ## Mask RCNN의 이해 02
