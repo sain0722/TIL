@@ -1,5 +1,7 @@
 # JAVA MINI PROJECT  
 ### 쇼핑몰 프로젝트(콘솔)
+![image](https://user-images.githubusercontent.com/52433248/144161111-b652074a-9b54-4988-af49-e5a2808d3a92.png)
+
 ---
 Memo
 - Service를 각 기능별로 나누었어야 하는데, 하나의 Service에서 진행함.
